@@ -1,0 +1,185 @@
+definitions:
+  github_com_ulixes-bloom_ya-gophermart_internal_models.OrderRequest:
+    properties:
+      number:
+        type: string
+    type: object
+  github_com_ulixes-bloom_ya-gophermart_internal_models.User:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  github_com_ulixes-bloom_ya-gophermart_internal_models.WithdrawalRequest:
+    properties:
+      order_number:
+        type: string
+      sum:
+        type: number
+    type: object
+info:
+  contact: {}
+paths:
+  /api/user/balance:
+    get:
+      operationId: GetUserBalance
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: успешная обработка запроса
+        "401":
+          description: пользователь не авторизован
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Получение текущего баланса пользователя
+  /api/user/balance/withdraw:
+    post:
+      operationId: WithdrawFromUserBalance
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        type: string
+      - description: User Registration Information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.WithdrawalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: успешная обработка запроса
+        "401":
+          description: пользователь не авторизован
+        "402":
+          description: на счету недостаточно средств
+        "422":
+          description: неверный номер заказа
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Запрос на списание средств
+  /api/user/login:
+    post:
+      operationId: AuthUser
+      parameters:
+      - description: User Registration Information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: пользователь успешно аутентифицирован
+        "400":
+          description: неверный формат запроса
+        "401":
+          description: неверная пара логин/пароль
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Аутентификация пользователя
+  /api/user/orders:
+    get:
+      operationId: GetUserOrders
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: успешная обработка запроса
+        "204":
+          description: нет данных для ответа
+        "401":
+          description: пользователь не авторизован
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Получение списка загруженных номеров заказов
+    post:
+      operationId: RegisterUserOrder
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        type: string
+      - description: User Registration Information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.OrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: номер заказа уже был загружен этим пользователем
+        "202":
+          description: новый номер заказа принят в обработку
+        "400":
+          description: неверный формат запроса
+        "401":
+          description: пользователь не аутентифицирован
+        "409":
+          description: номер заказа уже был загружен другим пользователем
+        "422":
+          description: неверный формат номера заказа
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Загрузка номера заказа
+  /api/user/register:
+    post:
+      operationId: RegisterUser
+      parameters:
+      - description: User Registration Information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: пользователь успешно зарегистрирован и аутентифицирован
+        "400":
+          description: неверный формат запроса
+        "409":
+          description: логин уже занят
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Регистрация пользователя
+  /api/user/withdrawals:
+    get:
+      operationId: GetUserWithdrawals
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: успешная обработка запроса
+        "204":
+          description: нет ни одного списания
+        "401":
+          description: пользователь не авторизован
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Получение информации о выводе средств
+swagger: "2.0"
