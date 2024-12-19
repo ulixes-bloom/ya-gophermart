@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/ulixes-bloom/ya-gophermart/api/gophermart/handler/mocks"
 	"github.com/ulixes-bloom/ya-gophermart/api/gophermart/middleware"
+	appErrors "github.com/ulixes-bloom/ya-gophermart/internal/errors"
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
 )
 
@@ -41,6 +43,19 @@ func TestHandler_GetUserBalance(t *testing.T) {
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
 			expectedStatusCode: http.StatusOK,
 			expectedBody:       "{\"withdrawn\":0,\"current\":0}\n",
+		},
+		{
+			name: "Balance does not exist Case",
+			mockService: func() *mocks.MockApp {
+				err := errors.New("User balance does not exist")
+
+				mockService := mocks.NewMockApp(ctrl)
+				mockService.EXPECT().GetUserBalance(int64(1)).Return(nil, err)
+				return mockService
+			},
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			expectedStatusCode: http.StatusInternalServerError,
+			expectedBody:       "User balance does not exist\n",
 		},
 	}
 
@@ -87,6 +102,53 @@ func TestHandler_WithdrawFromUserBalance(t *testing.T) {
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
 			expectedStatusCode: http.StatusOK,
 		},
+		{
+			name: "Negative balance Case",
+			mockService: func() *mocks.MockApp {
+				withdrawalReq := &models.WithdrawalRequest{
+					Order: "2377225624",
+					Sum:   200,
+				}
+				err := appErrors.ErrNegativeBalance
+
+				mockService := mocks.NewMockApp(ctrl)
+				mockService.EXPECT().WithdrawFromUserBalance(withdrawalReq, int64(1)).Return(err)
+				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
+				return mockService
+			},
+			reqBody:            bytes.NewBuffer([]byte("{\"order\":\"2377225624\",\"sum\":200.0}\n")),
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			expectedStatusCode: http.StatusPaymentRequired,
+		},
+		{
+			name: "Not valid order number Case",
+			mockService: func() *mocks.MockApp {
+				mockService := mocks.NewMockApp(ctrl)
+				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(false)
+				return mockService
+			},
+			reqBody:            bytes.NewBuffer([]byte("{\"order\":\"2377225624\",\"sum\":200.0}\n")),
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			expectedStatusCode: http.StatusUnprocessableEntity,
+		},
+		{
+			name: "Data base error Case",
+			mockService: func() *mocks.MockApp {
+				withdrawalReq := &models.WithdrawalRequest{
+					Order: "2377225624",
+					Sum:   200,
+				}
+				err := errors.New("Table witdrawals does not exist")
+
+				mockService := mocks.NewMockApp(ctrl)
+				mockService.EXPECT().WithdrawFromUserBalance(withdrawalReq, int64(1)).Return(err)
+				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
+				return mockService
+			},
+			reqBody:            bytes.NewBuffer([]byte("{\"order\":\"2377225624\",\"sum\":200.0}\n")),
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			expectedStatusCode: http.StatusInternalServerError,
+		},
 	}
 
 	for _, tt := range tests {
@@ -132,6 +194,30 @@ func TestHandler_GetUserWithdrawals(t *testing.T) {
 			expectedBody:       "[{\"order\":\"2377225624\",\"processed_at\":\"2024-01-02T00:00:00Z\",\"sum\":200}]\n",
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
 			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name: "No wihdrawals Case",
+			mockService: func() *mocks.MockApp {
+				withdrawals := []models.Withdrawal{}
+				mockService := mocks.NewMockApp(ctrl)
+				mockService.EXPECT().GetUserWithdrawals(int64(1)).Return(withdrawals, nil)
+				return mockService
+			},
+			expectedBody:       "",
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			expectedStatusCode: http.StatusNoContent,
+		},
+		{
+			name: "Data base error Case",
+			mockService: func() *mocks.MockApp {
+				err := errors.New("Table witdrawals does not exist")
+				mockService := mocks.NewMockApp(ctrl)
+				mockService.EXPECT().GetUserWithdrawals(int64(1)).Return(nil, err)
+				return mockService
+			},
+			expectedBody:       "Table witdrawals does not exist\n",
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			expectedStatusCode: http.StatusInternalServerError,
 		},
 	}
 

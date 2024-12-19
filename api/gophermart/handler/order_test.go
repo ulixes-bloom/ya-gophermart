@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/ulixes-bloom/ya-gophermart/api/gophermart/handler/mocks"
 	"github.com/ulixes-bloom/ya-gophermart/api/gophermart/middleware"
+	appErrors "github.com/ulixes-bloom/ya-gophermart/internal/errors"
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
 )
 
@@ -30,13 +32,76 @@ func TestHandler_RegisterUserOrder(t *testing.T) {
 			name: "Success Case",
 			mockService: func() *mocks.MockApp {
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().RegisterOrder("1234", int64(1)).Return(nil)
-				mockService.EXPECT().ValidateOrderNumber("1234").Return(true)
+				mockService.EXPECT().RegisterOrder("2377225624", int64(1)).Return(nil)
+				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
-			reqBody:            bytes.NewBuffer([]byte("{\"number\":\"1234\"}\n")),
+			reqBody:            bytes.NewBuffer([]byte("{\"number\":\"2377225624\"}\n")),
 			expectedStatusCode: http.StatusAccepted,
+		},
+		{
+			name: "Order already restired by current user Case",
+			mockService: func() *mocks.MockApp {
+				mockService := mocks.NewMockApp(ctrl)
+				err := appErrors.ErrOrderWasUploadedByCurrentUser
+
+				mockService.EXPECT().RegisterOrder("2377225624", int64(1)).Return(err)
+				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
+				return mockService
+			},
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			reqBody:            bytes.NewBuffer([]byte("{\"number\":\"2377225624\"}\n")),
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name: "Order already restired by another user Case",
+			mockService: func() *mocks.MockApp {
+				mockService := mocks.NewMockApp(ctrl)
+				err := appErrors.ErrOrderWasUploadedByAnotherUser
+
+				mockService.EXPECT().RegisterOrder("2377225624", int64(1)).Return(err)
+				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
+				return mockService
+			},
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			reqBody:            bytes.NewBuffer([]byte("{\"number\":\"2377225624\"}\n")),
+			expectedStatusCode: http.StatusConflict,
+		},
+		{
+			name: "Not valid order number Case",
+			mockService: func() *mocks.MockApp {
+				mockService := mocks.NewMockApp(ctrl)
+				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(false)
+				return mockService
+			},
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			reqBody:            bytes.NewBuffer([]byte("{\"number\":\"2377225624\"}\n")),
+			expectedStatusCode: http.StatusUnprocessableEntity,
+		},
+		{
+			name: "Bad request body Case",
+			mockService: func() *mocks.MockApp {
+				mockService := mocks.NewMockApp(ctrl)
+				return mockService
+			},
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			reqBody:            bytes.NewBuffer([]byte("{\"number:\"2377225624\"}\n")),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name: "Data base error Case",
+			mockService: func() *mocks.MockApp {
+				mockService := mocks.NewMockApp(ctrl)
+				err := errors.New("Table orders does not exist")
+
+				mockService.EXPECT().RegisterOrder("2377225624", int64(1)).Return(err)
+				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
+				return mockService
+			},
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			reqBody:            bytes.NewBuffer([]byte("{\"number\":\"2377225624\"}\n")),
+			expectedStatusCode: http.StatusInternalServerError,
 		},
 	}
 
@@ -78,12 +143,36 @@ func TestHandler_GetUserOrders(t *testing.T) {
 					},
 				}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().GetOrdersByUser(int64(1)).Return(orders, nil).AnyTimes()
+				mockService.EXPECT().GetOrdersByUser(int64(1)).Return(orders, nil)
 				return mockService
 			},
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
 			expectedBody:       "[{\"number\":\"2377225624\",\"status\":\"NEW\",\"accrual\":200,\"uploaded_at\":\"2024-01-02T00:00:00Z\"}]\n",
 			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name: "No orders Case",
+			mockService: func() *mocks.MockApp {
+				orders := []models.Order{}
+				mockService := mocks.NewMockApp(ctrl)
+				mockService.EXPECT().GetOrdersByUser(int64(1)).Return(orders, nil)
+				return mockService
+			},
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			expectedBody:       "",
+			expectedStatusCode: http.StatusNoContent,
+		},
+		{
+			name: "Success Case",
+			mockService: func() *mocks.MockApp {
+				err := errors.New("Table orders does not exist")
+				mockService := mocks.NewMockApp(ctrl)
+				mockService.EXPECT().GetOrdersByUser(int64(1)).Return(nil, err)
+				return mockService
+			},
+			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
+			expectedBody:       "Table orders does not exist\n",
+			expectedStatusCode: http.StatusInternalServerError,
 		},
 	}
 
