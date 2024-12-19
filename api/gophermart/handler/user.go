@@ -11,15 +11,15 @@ import (
 	"github.com/ulixes-bloom/ya-gophermart/internal/security"
 )
 
-//	@Summary	Регистрация пользователя
-//	@ID			RegisterUser
-//	@Produce	json
-//	@Success	200	"пользователь успешно зарегистрирован и аутентифицирован"
-//	@Failure	400	"неверный формат запроса"
-//	@Failure	409	"логин уже занят"
-//	@Failure	500	"внутренняя ошибка сервера"
-//	@Router		/api/user/register [post]
-//	@Param		user	body	models.User	true	"User Registration Information"
+// @Summary	Регистрация пользователя
+// @ID			RegisterUser
+// @Produce	json
+// @Success	200	"пользователь успешно зарегистрирован и аутентифицирован"
+// @Failure	400	"неверный формат запроса"
+// @Failure	409	"логин уже занят"
+// @Failure	500	"внутренняя ошибка сервера"
+// @Router		/api/user/register [post]
+// @Param		user	body	models.User	true	"User Registration Information"
 func (h *HTTPHandler) RegisterUser(rw http.ResponseWriter, req *http.Request) {
 	user := &models.User{}
 	dec := json.NewDecoder(req.Body)
@@ -56,15 +56,15 @@ func (h *HTTPHandler) RegisterUser(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-//	@Summary	Аутентификация пользователя
-//	@ID			AuthUser
-//	@Produce	json
-//	@Success	200	"пользователь успешно аутентифицирован"
-//	@Failure	400	"неверный формат запроса"
-//	@Failure	401	"неверная пара логин/пароль"
-//	@Failure	500	"внутренняя ошибка сервера"
-//	@Router		/api/user/login [post]
-//	@Param		user	body	models.User	true	"User Registration Information"
+// @Summary	Аутентификация пользователя
+// @ID			AuthUser
+// @Produce	json
+// @Success	200	"пользователь успешно аутентифицирован"
+// @Failure	400	"неверный формат запроса"
+// @Failure	401	"неверная пара логин/пароль"
+// @Failure	500	"внутренняя ошибка сервера"
+// @Router		/api/user/login [post]
+// @Param		user	body	models.User	true	"User Registration Information"
 func (h *HTTPHandler) AuthUser(rw http.ResponseWriter, req *http.Request) {
 	user := &models.User{}
 	dec := json.NewDecoder(req.Body)
