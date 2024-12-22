@@ -65,7 +65,7 @@ func (pg *pgstorage) WithdrawFromUserBalance(orderNumber string, sum models.Mone
 	var newBalance models.Money
 	err = tx.QueryRow(`
 		UPDATE balances
-		SET withdrawn=balances.withdrawn+$1, current=balances.current-$2
+		SET withdrawn=balances.withdrawn+$1, current=balances.current-$1
 		WHERE user_id=$2
 		RETURNING current;`, sum, userID).Scan(&newBalance)
 	if err != nil {

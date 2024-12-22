@@ -2,10 +2,12 @@ package accrual
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/ulixes-bloom/ya-gophermart/internal/config"
+	appErrors "github.com/ulixes-bloom/ya-gophermart/internal/errors"
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
 	"github.com/ulixes-bloom/ya-gophermart/internal/workerpool"
 )
@@ -69,9 +71,9 @@ func (ac *Client) GetOrderInfo(order *models.Order) (*models.Order, error) {
 		}
 		return order, nil
 	case http.StatusNoContent:
-		return nil, fmt.Errorf("accrual.getOrderInfo: order %s is not registered in accrual service", order.Number)
+		return nil, errors.Join(appErrors.ErrAccrualOrderNotRegistered, fmt.Errorf("accrual.getOrderInfo: order %s", order.Number))
 	case http.StatusTooManyRequests:
-		return nil, fmt.Errorf("accrual.getOrderInfo: too many requests to accrual service", order.Number)
+		return nil, errors.Join(appErrors.ErrAccrualTooManyRequests, fmt.Errorf("accrual.getOrderInfo: order %s", order.Number))
 	default:
 		return nil, fmt.Errorf("accrual.getOrderInfo: %d", resp.StatusCode)
 	}

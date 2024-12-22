@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/ulixes-bloom/ya-gophermart/internal/accrual/mocks"
 	"github.com/ulixes-bloom/ya-gophermart/internal/config"
+	appErrors "github.com/ulixes-bloom/ya-gophermart/internal/errors"
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
 )
 
@@ -21,7 +22,7 @@ func TestAccrualClient_GetOrderInfo(t *testing.T) {
 		name          string
 		mockClient    func() *mocks.MockHTTPClient
 		conf          *config.Config
-		expectedOrder models.Order
+		expectedOrder *models.Order
 		expectedErr   error
 	}{
 		{
@@ -38,12 +39,42 @@ func TestAccrualClient_GetOrderInfo(t *testing.T) {
 				return mockService
 			},
 			conf: config.GetDefault(),
-			expectedOrder: models.Order{
+			expectedOrder: &models.Order{
 				Number:  "2377225624",
 				Status:  models.OrderStatusNew,
 				Accrual: 200,
 			},
 			expectedErr: nil,
+		},
+		{
+			name: "Order not regisered Case",
+			mockClient: func() *mocks.MockHTTPClient {
+				mockService := mocks.NewMockHTTPClient(ctrl)
+				mockResponse := &http.Response{
+					StatusCode: 204,
+					Body:       io.NopCloser(nil),
+				}
+				mockService.EXPECT().Do(gomock.Any()).Return(mockResponse, nil)
+				return mockService
+			},
+			conf:          config.GetDefault(),
+			expectedOrder: nil,
+			expectedErr:   appErrors.ErrAccrualOrderNotRegistered,
+		},
+		{
+			name: "Too many requests Case",
+			mockClient: func() *mocks.MockHTTPClient {
+				mockService := mocks.NewMockHTTPClient(ctrl)
+				mockResponse := &http.Response{
+					StatusCode: 429,
+					Body:       io.NopCloser(nil),
+				}
+				mockService.EXPECT().Do(gomock.Any()).Return(mockResponse, nil)
+				return mockService
+			},
+			conf:          config.GetDefault(),
+			expectedOrder: nil,
+			expectedErr:   appErrors.ErrAccrualTooManyRequests,
 		},
 	}
 
@@ -53,9 +84,13 @@ func TestAccrualClient_GetOrderInfo(t *testing.T) {
 
 			order, err := ac.GetOrderInfo(&models.Order{})
 
-			assert.Equal(t, tt.expectedErr, err)
+			if tt.expectedErr != nil {
+				assert.ErrorIs(t, err, tt.expectedErr)
+				assert.Nil(t, order)
+			} else {
+				assert.NotNil(t, order)
+				assert.NoError(t, err)
 
-			if order != nil {
 				assert.Equal(t, tt.expectedOrder.Number, order.Number)
 				assert.Equal(t, tt.expectedOrder.Accrual, order.Accrual)
 				assert.Equal(t, tt.expectedOrder.Status, order.Status)

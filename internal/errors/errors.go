@@ -15,4 +15,7 @@ var (
 	ErrUserUnauthorized             = errors.New("user unauthorized")
 
 	ErrNegativeBalance = errors.New("negative balance")
+
+	ErrAccrualOrderNotRegistered = errors.New("order not registered in accrual service")
+	ErrAccrualTooManyRequests    = errors.New("too many requests to accrual service")
 )

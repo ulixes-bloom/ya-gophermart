@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/rs/zerolog/log"
-	"github.com/ulixes-bloom/ya-gophermart/internal/errors"
+	appErrors "github.com/ulixes-bloom/ya-gophermart/internal/errors"
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
 	"github.com/ulixes-bloom/ya-gophermart/internal/security"
 )
@@ -31,7 +31,7 @@ func (pg *pgstorage) AddUser(login, password string) (int64, error) {
 	if err != nil {
 		if pgError, ok := err.(*pgconn.PgError); ok &&
 			pgError.Code == pgerrcode.UniqueViolation && pgError.ConstraintName == "users_login_key" {
-			return -1, fmt.Errorf(`pg.AddUser: %w: %s`, errors.ErrUserLoginAlreadyExists, err)
+			return -1, fmt.Errorf(`pg.AddUser: %w: %s`, appErrors.ErrUserLoginAlreadyExists, err)
 		}
 		return -1, fmt.Errorf("pg.AddUser: %w", err)
 	}
