@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -27,18 +28,29 @@ func New(conf *config.Config, app *app.App) *API {
 
 func (a *API) Run(ctx context.Context) error {
 	errCh := make(chan error, 1)
+	var wg sync.WaitGroup
 
+	// Запуск HTTP сервера
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		errCh <- http.ListenAndServe(a.conf.RunAddr, a.router)
 	}()
 
-	go a.updateNotProcessedOrders(ctx)
+	// Обновление информаци по необработанным заказам
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		a.updateNotProcessedOrders(ctx)
+	}()
 
+	// Ожидание завершения работы
 	for {
 		select {
 		case err := <-errCh:
 			return err
 		case <-ctx.Done():
+			wg.Wait()
 			return a.app.Shutdown()
 		}
 	}

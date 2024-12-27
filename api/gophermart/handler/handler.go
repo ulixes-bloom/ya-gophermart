@@ -19,7 +19,7 @@ func New(app App, conf *config.Config) *HTTPHandler {
 	}
 }
 
-func (h *HTTPHandler) Error(rw http.ResponseWriter, err error, errMsg string, statusCode int) {
+func (h *HTTPHandler) handleError(rw http.ResponseWriter, err error, errMsg string, statusCode int) {
 	log.Error().Err(err).Msg(errMsg)
 	http.Error(rw, errMsg, statusCode)
 }

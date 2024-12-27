@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -25,18 +24,30 @@ import (
 // @Param		Authorization	header	string				false	"Bearer"
 // @Param		user			body	models.OrderRequest	true	"User Registration Information"
 func (h *HTTPHandler) RegisterUserOrder(rw http.ResponseWriter, req *http.Request) {
-	userID := req.Context().Value(middleware.UserIDContext).(int64)
+	userID, ok := req.Context().Value(middleware.UserIDContext).(int64)
+	if !ok {
+		h.handleError(rw,
+			appErrors.ErrUserInalidID,
+			appErrors.ErrUserInalidID.Error(),
+			http.StatusInternalServerError)
+		return
+	}
+
+	if req.Body == nil {
+		h.handleError(rw, nil, "request body is missing", http.StatusBadRequest)
+		return
+	}
 
 	orderReq := &models.OrderRequest{}
 	dec := json.NewDecoder(req.Body)
 	if err := dec.Decode(orderReq); err != nil {
-		h.Error(rw, err, err.Error(), http.StatusBadRequest)
+		h.handleError(rw, err, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	valid := h.app.ValidateOrderNumber(orderReq.Number)
 	if !valid {
-		h.Error(rw,
+		h.handleError(rw,
 			appErrors.ErrInvalidOrderNumber,
 			appErrors.ErrInvalidOrderNumber.Error(),
 			http.StatusUnprocessableEntity)
@@ -48,14 +59,13 @@ func (h *HTTPHandler) RegisterUserOrder(rw http.ResponseWriter, req *http.Reques
 		switch {
 		case errors.Is(err, appErrors.ErrOrderWasUploadedByCurrentUser):
 			rw.WriteHeader(http.StatusOK)
-			rw.Write([]byte(appErrors.ErrOrderWasUploadedByCurrentUser.Error()))
 		case errors.Is(err, appErrors.ErrOrderWasUploadedByAnotherUser):
-			h.Error(rw,
+			h.handleError(rw,
 				appErrors.ErrOrderWasUploadedByCurrentUser,
 				appErrors.ErrOrderWasUploadedByCurrentUser.Error(),
 				http.StatusConflict)
 		default:
-			h.Error(rw, err, err.Error(), http.StatusInternalServerError)
+			h.handleError(rw, err, err.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -73,10 +83,18 @@ func (h *HTTPHandler) RegisterUserOrder(rw http.ResponseWriter, req *http.Reques
 // @Router		/api/user/orders [get]
 // @Param		Authorization	header	string	false	"Bearer"
 func (h *HTTPHandler) GetUserOrders(rw http.ResponseWriter, req *http.Request) {
-	userID := req.Context().Value(middleware.UserIDContext).(int64)
+	userID, ok := req.Context().Value(middleware.UserIDContext).(int64)
+	if !ok {
+		h.handleError(rw,
+			appErrors.ErrUserInalidID,
+			appErrors.ErrUserInalidID.Error(),
+			http.StatusInternalServerError)
+		return
+	}
+
 	dbOrders, err := h.app.GetOrdersByUser(userID)
 	if err != nil {
-		h.Error(rw, err, err.Error(), http.StatusInternalServerError)
+		h.handleError(rw, err, "failed to get user orders", http.StatusInternalServerError)
 		return
 	}
 
@@ -85,10 +103,10 @@ func (h *HTTPHandler) GetUserOrders(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var bufOrders bytes.Buffer
-	jsonEncoder := json.NewEncoder(&bufOrders)
-	jsonEncoder.Encode(dbOrders)
+	if err := json.NewEncoder(rw).Encode(dbOrders); err != nil {
+		h.handleError(rw, err, "failed to encode orders", http.StatusInternalServerError)
+		return
+	}
 
 	rw.WriteHeader(http.StatusOK)
-	rw.Write(bufOrders.Bytes())
 }

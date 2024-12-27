@@ -21,15 +21,20 @@ import (
 // @Router		/api/user/register [post]
 // @Param		user	body	models.User	true	"User Registration Information"
 func (h *HTTPHandler) RegisterUser(rw http.ResponseWriter, req *http.Request) {
+	if req.Body == nil {
+		h.handleError(rw, nil, "request body is missing", http.StatusBadRequest)
+		return
+	}
+
 	user := &models.User{}
 	dec := json.NewDecoder(req.Body)
 	if err := dec.Decode(user); err != nil {
-		h.Error(rw, err, err.Error(), http.StatusBadRequest)
+		h.handleError(rw, err, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if user.Login == "" || user.Password == "" {
-		h.Error(rw,
+		h.handleError(rw,
 			appErrors.ErrUserLoginAndPasswordRequired,
 			appErrors.ErrUserLoginAndPasswordRequired.Error(),
 			http.StatusBadRequest)
@@ -39,16 +44,16 @@ func (h *HTTPHandler) RegisterUser(rw http.ResponseWriter, req *http.Request) {
 	createdUserID, err := h.app.RegisterUser(user)
 	if err != nil {
 		if errors.Is(err, appErrors.ErrUserLoginAlreadyExists) {
-			h.Error(rw, err, appErrors.ErrUserLoginAlreadyExists.Error(), http.StatusConflict)
+			h.handleError(rw, err, appErrors.ErrUserLoginAlreadyExists.Error(), http.StatusConflict)
 			return
 		}
-		h.Error(rw, err, err.Error(), http.StatusInternalServerError)
+		h.handleError(rw, err, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	jwtToken, err := security.BuildJWTString(createdUserID, h.conf.TokenSecretKey, h.conf.TokenLifetime)
 	if err != nil {
-		h.Error(rw, err, err.Error(), http.StatusInternalServerError)
+		h.handleError(rw, err, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -66,15 +71,20 @@ func (h *HTTPHandler) RegisterUser(rw http.ResponseWriter, req *http.Request) {
 // @Router		/api/user/login [post]
 // @Param		user	body	models.User	true	"User Registration Information"
 func (h *HTTPHandler) AuthUser(rw http.ResponseWriter, req *http.Request) {
+	if req.Body == nil {
+		h.handleError(rw, nil, "request body is missing", http.StatusBadRequest)
+		return
+	}
+
 	user := &models.User{}
 	dec := json.NewDecoder(req.Body)
 	if err := dec.Decode(user); err != nil {
-		h.Error(rw, err, err.Error(), http.StatusBadRequest)
+		h.handleError(rw, err, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if user.Login == "" || user.Password == "" {
-		h.Error(rw,
+		h.handleError(rw,
 			appErrors.ErrUserLoginAndPasswordRequired,
 			appErrors.ErrUserLoginAndPasswordRequired.Error(),
 			http.StatusBadRequest)
@@ -83,13 +93,13 @@ func (h *HTTPHandler) AuthUser(rw http.ResponseWriter, req *http.Request) {
 
 	dbUser, err := h.app.ValidateUser(user)
 	if err != nil {
-		h.Error(rw, err, appErrors.ErrInvalidUserLoginOrPassword.Error(), http.StatusUnauthorized)
+		h.handleError(rw, err, appErrors.ErrInvalidUserLoginOrPassword.Error(), http.StatusUnauthorized)
 		return
 	}
 
 	jwtToken, err := security.BuildJWTString(dbUser.ID, h.conf.TokenSecretKey, h.conf.TokenLifetime)
 	if err != nil {
-		h.Error(rw, err, err.Error(), http.StatusInternalServerError)
+		h.handleError(rw, err, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

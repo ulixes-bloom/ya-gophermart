@@ -163,7 +163,7 @@ func TestHandler_GetUserOrders(t *testing.T) {
 			expectedStatusCode: http.StatusNoContent,
 		},
 		{
-			name: "Success Case",
+			name: "Data base error Case",
 			mockService: func() *mocks.MockApp {
 				err := errors.New("Table orders does not exist")
 				mockService := mocks.NewMockApp(ctrl)
@@ -171,7 +171,7 @@ func TestHandler_GetUserOrders(t *testing.T) {
 				return mockService
 			},
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
-			expectedBody:       "Table orders does not exist\n",
+			expectedBody:       "failed to get user orders\n",
 			expectedStatusCode: http.StatusInternalServerError,
 		},
 	}

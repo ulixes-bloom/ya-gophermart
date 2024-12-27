@@ -13,6 +13,7 @@ var (
 	ErrInvalidUserLoginOrPassword   = errors.New("invalid login or password")
 	ErrUserLoginAndPasswordRequired = errors.New("login and password are required")
 	ErrUserUnauthorized             = errors.New("user unauthorized")
+	ErrUserInalidID                 = errors.New("invalid user ID")
 
 	ErrNegativeBalance = errors.New("negative balance")
 

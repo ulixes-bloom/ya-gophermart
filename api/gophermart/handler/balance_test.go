@@ -55,7 +55,7 @@ func TestHandler_GetUserBalance(t *testing.T) {
 			},
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
 			expectedStatusCode: http.StatusInternalServerError,
-			expectedBody:       "User balance does not exist\n",
+			expectedBody:       "failed to get user balance\n",
 		},
 	}
 
@@ -215,7 +215,7 @@ func TestHandler_GetUserWithdrawals(t *testing.T) {
 				mockService.EXPECT().GetUserWithdrawals(int64(1)).Return(nil, err)
 				return mockService
 			},
-			expectedBody:       "Table witdrawals does not exist\n",
+			expectedBody:       "failed to get user waithdrawals\n",
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
 			expectedStatusCode: http.StatusInternalServerError,
 		},
