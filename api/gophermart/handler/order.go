@@ -54,15 +54,15 @@ func (h *HTTPHandler) RegisterUserOrder(rw http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	err := h.app.RegisterOrder(orderReq.Number, userID)
+	err := h.app.RegisterOrder(userID, orderReq.Number)
 	if err != nil {
 		switch {
 		case errors.Is(err, appErrors.ErrOrderWasUploadedByCurrentUser):
 			rw.WriteHeader(http.StatusOK)
 		case errors.Is(err, appErrors.ErrOrderWasUploadedByAnotherUser):
 			h.handleError(rw,
-				appErrors.ErrOrderWasUploadedByCurrentUser,
-				appErrors.ErrOrderWasUploadedByCurrentUser.Error(),
+				appErrors.ErrOrderWasUploadedByAnotherUser,
+				appErrors.ErrOrderWasUploadedByAnotherUser.Error(),
 				http.StatusConflict)
 		default:
 			h.handleError(rw, err, err.Error(), http.StatusInternalServerError)

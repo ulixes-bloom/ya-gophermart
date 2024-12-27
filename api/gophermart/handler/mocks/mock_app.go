@@ -80,17 +80,17 @@ func (mr *MockAppMockRecorder) GetUserWithdrawals(userID interface{}) *gomock.Ca
 }
 
 // RegisterOrder mocks base method.
-func (m *MockApp) RegisterOrder(orderNumber string, userID int64) error {
+func (m *MockApp) RegisterOrder(userID int64, orderNumber string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterOrder", orderNumber, userID)
+	ret := m.ctrl.Call(m, "RegisterOrder", userID, orderNumber)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RegisterOrder indicates an expected call of RegisterOrder.
-func (mr *MockAppMockRecorder) RegisterOrder(orderNumber, userID interface{}) *gomock.Call {
+func (mr *MockAppMockRecorder) RegisterOrder(userID, orderNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterOrder", reflect.TypeOf((*MockApp)(nil).RegisterOrder), orderNumber, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterOrder", reflect.TypeOf((*MockApp)(nil).RegisterOrder), userID, orderNumber)
 }
 
 // RegisterUser mocks base method.
@@ -138,15 +138,15 @@ func (mr *MockAppMockRecorder) ValidateUser(user interface{}) *gomock.Call {
 }
 
 // WithdrawFromUserBalance mocks base method.
-func (m *MockApp) WithdrawFromUserBalance(withdrawalReq *models.WithdrawalRequest, userID int64) error {
+func (m *MockApp) WithdrawFromUserBalance(userID int64, withdrawalReq *models.WithdrawalRequest) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WithdrawFromUserBalance", withdrawalReq, userID)
+	ret := m.ctrl.Call(m, "WithdrawFromUserBalance", userID, withdrawalReq)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // WithdrawFromUserBalance indicates an expected call of WithdrawFromUserBalance.
-func (mr *MockAppMockRecorder) WithdrawFromUserBalance(withdrawalReq, userID interface{}) *gomock.Call {
+func (mr *MockAppMockRecorder) WithdrawFromUserBalance(userID, withdrawalReq interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawFromUserBalance", reflect.TypeOf((*MockApp)(nil).WithdrawFromUserBalance), withdrawalReq, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawFromUserBalance", reflect.TypeOf((*MockApp)(nil).WithdrawFromUserBalance), userID, withdrawalReq)
 }

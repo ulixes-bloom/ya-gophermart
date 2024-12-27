@@ -83,7 +83,7 @@ func TestStorage_WithdrawFromBalance(t *testing.T) {
 	}
 
 	// Попытка списания со счета при недостаточном значении баланса
-	err = storage.WithdrawFromUserBalance(withdrawalReq.Order, withdrawalReq.Sum, userID)
+	err = storage.WithdrawFromUserBalance(userID, withdrawalReq.Order, withdrawalReq.Sum)
 	assert.ErrorIs(t, err, appErrors.ErrNegativeBalance)
 
 	order := models.Order{
@@ -94,7 +94,7 @@ func TestStorage_WithdrawFromBalance(t *testing.T) {
 	}
 
 	// Регистрация заказа с начислнием бонусов
-	err = storage.RegisterOrder(order.Number, userID)
+	err = storage.RegisterOrder(userID, order.Number)
 	require.NoError(t, err)
 	err = storage.UpdateOrders([]models.Order{order})
 	require.NoError(t, err)
@@ -109,7 +109,7 @@ func TestStorage_WithdrawFromBalance(t *testing.T) {
 	assert.Equal(t, dbBalance.Withdrawn, models.Money(0))
 
 	// Попытка списания со счета при достаточном значении баланса
-	err = storage.WithdrawFromUserBalance(withdrawalReq.Order, withdrawalReq.Sum, userID)
+	err = storage.WithdrawFromUserBalance(userID, withdrawalReq.Order, withdrawalReq.Sum)
 	require.NoError(t, err)
 
 	// Проверка результата списания средств со счета

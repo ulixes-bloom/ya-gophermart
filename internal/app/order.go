@@ -7,8 +7,8 @@ import (
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
 )
 
-func (a *App) RegisterOrder(orderNumber string, userID int64) error {
-	err := a.storage.RegisterOrder(orderNumber, userID)
+func (a *App) RegisterOrder(userID int64, orderNumber string) error {
+	err := a.storage.RegisterOrder(userID, orderNumber)
 	if err != nil {
 		return fmt.Errorf("app.registerOrder: %w", err)
 	}

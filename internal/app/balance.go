@@ -22,8 +22,8 @@ func (a *App) GetUserWithdrawals(userID int64) ([]models.Withdrawal, error) {
 	return dbWithdrawals, nil
 }
 
-func (a *App) WithdrawFromUserBalance(withdrawalReq *models.WithdrawalRequest, userID int64) error {
-	err := a.storage.WithdrawFromUserBalance(withdrawalReq.Order, withdrawalReq.Sum, userID)
+func (a *App) WithdrawFromUserBalance(userID int64, withdrawalReq *models.WithdrawalRequest) error {
+	err := a.storage.WithdrawFromUserBalance(userID, withdrawalReq.Order, withdrawalReq.Sum)
 	if err != nil {
 		return fmt.Errorf("app.withdrawFromUserBalance: %w", err)
 	}

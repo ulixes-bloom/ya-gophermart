@@ -84,7 +84,7 @@ func (h *HTTPHandler) WithdrawFromUserBalance(rw http.ResponseWriter, req *http.
 		return
 	}
 
-	err := h.app.WithdrawFromUserBalance(withdrawalReq, userID)
+	err := h.app.WithdrawFromUserBalance(userID, withdrawalReq)
 	if err != nil {
 		if errors.Is(err, appErrors.ErrNegativeBalance) {
 			h.handleError(rw, err, appErrors.ErrNegativeBalance.Error(), http.StatusPaymentRequired)

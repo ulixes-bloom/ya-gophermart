@@ -47,7 +47,7 @@ func (pg *pgstorage) GetWithdrawalsByUser(userID int64) ([]models.Withdrawal, er
 	return dbWithdrawal, nil
 }
 
-func (pg *pgstorage) WithdrawFromUserBalance(orderNumber string, sum models.Money, userID int64) error {
+func (pg *pgstorage) WithdrawFromUserBalance(userID int64, orderNumber string, sum models.Money) error {
 	tx, err := pg.db.Begin()
 	if err != nil {
 		return fmt.Errorf("pg.withdrawFromUserBalance.beginTx: %w", err)

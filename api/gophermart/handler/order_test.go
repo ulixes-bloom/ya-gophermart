@@ -32,7 +32,7 @@ func TestHandler_RegisterUserOrder(t *testing.T) {
 			name: "Success Case",
 			mockService: func() *mocks.MockApp {
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().RegisterOrder("2377225624", int64(1)).Return(nil)
+				mockService.EXPECT().RegisterOrder(int64(1), "2377225624").Return(nil)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -46,7 +46,7 @@ func TestHandler_RegisterUserOrder(t *testing.T) {
 				mockService := mocks.NewMockApp(ctrl)
 				err := appErrors.ErrOrderWasUploadedByCurrentUser
 
-				mockService.EXPECT().RegisterOrder("2377225624", int64(1)).Return(err)
+				mockService.EXPECT().RegisterOrder(int64(1), "2377225624").Return(err)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -60,7 +60,7 @@ func TestHandler_RegisterUserOrder(t *testing.T) {
 				mockService := mocks.NewMockApp(ctrl)
 				err := appErrors.ErrOrderWasUploadedByAnotherUser
 
-				mockService.EXPECT().RegisterOrder("2377225624", int64(1)).Return(err)
+				mockService.EXPECT().RegisterOrder(int64(1), "2377225624").Return(err)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -95,7 +95,7 @@ func TestHandler_RegisterUserOrder(t *testing.T) {
 				mockService := mocks.NewMockApp(ctrl)
 				err := errors.New("Table orders does not exist")
 
-				mockService.EXPECT().RegisterOrder("2377225624", int64(1)).Return(err)
+				mockService.EXPECT().RegisterOrder(int64(1), "2377225624").Return(err)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},

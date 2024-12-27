@@ -9,7 +9,7 @@ import (
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
 )
 
-func (pg *pgstorage) RegisterOrder(orderNumber string, userID int64) error {
+func (pg *pgstorage) RegisterOrder(userID int64, orderNumber string) error {
 	_, err := pg.db.Exec(`
 		INSERT INTO orders (user_id, number, status)
 		VALUES ($1, $2, $3)

@@ -33,11 +33,8 @@ func (h *HTTPHandler) RegisterUser(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if user.Login == "" || user.Password == "" {
-		h.handleError(rw,
-			appErrors.ErrUserLoginAndPasswordRequired,
-			appErrors.ErrUserLoginAndPasswordRequired.Error(),
-			http.StatusBadRequest)
+	if err := checkUserCredentials(user); err != nil {
+		h.handleError(rw, err, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -83,11 +80,8 @@ func (h *HTTPHandler) AuthUser(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if user.Login == "" || user.Password == "" {
-		h.handleError(rw,
-			appErrors.ErrUserLoginAndPasswordRequired,
-			appErrors.ErrUserLoginAndPasswordRequired.Error(),
-			http.StatusBadRequest)
+	if err := checkUserCredentials(user); err != nil {
+		h.handleError(rw, err, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -105,4 +99,11 @@ func (h *HTTPHandler) AuthUser(rw http.ResponseWriter, req *http.Request) {
 
 	rw.Header().Add("Authorization", fmt.Sprintf("Bearer %s", jwtToken))
 	rw.WriteHeader(http.StatusOK)
+}
+
+func checkUserCredentials(user *models.User) error {
+	if user.Login == "" || user.Password == "" {
+		return appErrors.ErrUserLoginAndPasswordRequired
+	}
+	return nil
 }
