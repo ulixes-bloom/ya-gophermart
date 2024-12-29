@@ -5,6 +5,7 @@ import (
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/lib/pq"
 	appErrors "github.com/ulixes-bloom/ya-gophermart/internal/errors"
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
 )
@@ -12,8 +13,7 @@ import (
 func (pg *pgstorage) RegisterOrder(userID int64, orderNumber string) error {
 	_, err := pg.db.Exec(`
 		INSERT INTO orders (user_id, number, status)
-		VALUES ($1, $2, $3)
-		RETURNING id;`, userID, orderNumber, "NEW")
+		VALUES ($1, $2, $3);`, userID, orderNumber, "NEW")
 
 	if err != nil {
 		if pgError, ok := err.(*pgconn.PgError); ok &&
@@ -66,33 +66,32 @@ func (pg *pgstorage) GetOrdersByUser(userID int64) ([]models.Order, error) {
 
 func (pg *pgstorage) GetOrdersByStatus(statuses []models.OrderStatus) ([]models.Order, error) {
 	orders := []models.Order{}
-	for _, status := range statuses {
-		rows, err := pg.db.Query(`
-			SELECT number, user_id, status, accrual, uploaded_at
-			FROM orders
-			WHERE status=$1;`, status)
-		if err != nil {
-			return nil, fmt.Errorf("pg.getOrdersByStatus.query: %w", err)
-		}
-		defer rows.Close()
 
-		for rows.Next() {
-			order := models.Order{}
-			err := rows.Scan(&order.Number, &order.UserID, &order.Status, &order.Accrual, &order.UploadedAt)
-			if err != nil {
-				return nil, fmt.Errorf("pg.getOrdersByStatus.scanRow: %w", err)
-			}
-			orders = append(orders, order)
+	rows, err := pg.db.Query(`
+        SELECT number, user_id, status, accrual, uploaded_at
+        FROM orders
+        WHERE status = ANY($1);`, pq.Array(statuses))
+	if err != nil {
+		return nil, fmt.Errorf("pg.getOrdersByStatus.query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		order := models.Order{}
+		err := rows.Scan(&order.Number, &order.UserID, &order.Status, &order.Accrual, &order.UploadedAt)
+		if err != nil {
+			return nil, fmt.Errorf("pg.getOrdersByStatus.scanRow: %w", err)
 		}
-		if err := rows.Err(); err != nil {
-			return nil, fmt.Errorf("pg.getOrdersByStatus.rowsErr: %w", err)
-		}
+		orders = append(orders, order)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("pg.getOrdersByStatus.rowsErr: %w", err)
 	}
 
 	return orders, nil
 }
 
-func (pg *pgstorage) UpdateOrders(orders []models.Order) error {
+func (pg *pgstorage) SetOrdersAccrualAndUpdateBalance(orders []models.Order) error {
 	tx, err := pg.db.Begin()
 	if err != nil {
 		return err
@@ -105,7 +104,7 @@ func (pg *pgstorage) UpdateOrders(orders []models.Order) error {
 			SET accrual=$1, status=$2
 			WHERE number=$3;`, order.Accrual, order.Status, order.Number)
 		if err != nil {
-			return fmt.Errorf("pg.updateOrders: %w", err)
+			return fmt.Errorf("pg.setOrdersAccrualAndUpdateBalance: %w", err)
 		}
 
 		_, err = tx.Exec(`
@@ -113,12 +112,12 @@ func (pg *pgstorage) UpdateOrders(orders []models.Order) error {
 			SET current=balances.current+$1
 			WHERE user_id=$2;`, order.Accrual, order.UserID)
 		if err != nil {
-			return fmt.Errorf("pg.updateOrders: %w", err)
+			return fmt.Errorf("pg.setOrdersAccrualAndUpdateBalance: %w", err)
 		}
 	}
 	err = tx.Commit()
 	if err != nil {
-		return fmt.Errorf("pg.updateOrders: %w", err)
+		return fmt.Errorf("pg.setOrdersAccrualAndUpdateBalance: %w", err)
 	}
 
 	return nil

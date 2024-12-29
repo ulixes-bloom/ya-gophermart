@@ -54,14 +54,6 @@ func (pg *pgstorage) WithdrawFromUserBalance(userID int64, orderNumber string, s
 	}
 	defer tx.Rollback()
 
-	_, err = tx.Exec(`
-		INSERT INTO withdrawals (user_id, order_number, sum)
-		VALUES ($1, $2, $3)
-		RETURNING id;`, userID, orderNumber, sum)
-	if err != nil {
-		return fmt.Errorf("pg.withdrawFromUserBalance: %w", err)
-	}
-
 	var newBalance models.Money
 	err = tx.QueryRow(`
 		UPDATE balances
@@ -73,6 +65,13 @@ func (pg *pgstorage) WithdrawFromUserBalance(userID int64, orderNumber string, s
 	}
 	if newBalance < 0 {
 		return appErrors.ErrNegativeBalance
+	}
+
+	_, err = tx.Exec(`
+	INSERT INTO withdrawals (user_id, order_number, sum)
+	VALUES ($1, $2, $3);`, userID, orderNumber, sum)
+	if err != nil {
+		return fmt.Errorf("pg.withdrawFromUserBalance: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {

@@ -22,9 +22,9 @@ func (a *App) UpdateNotProcessedOrders() error {
 		return fmt.Errorf("app.updateNotProcessedOrders.getOrdersInfo: %w", err)
 	}
 
-	err = a.storage.UpdateOrders(updatedOrders)
+	err = a.storage.SetOrdersAccrualAndUpdateBalance(updatedOrders)
 	if err != nil {
-		return fmt.Errorf("app.updateNotProcessedOrders.updateOrders: %w", err)
+		return fmt.Errorf("app.updateNotProcessedOrders.setOrdersAccrualAndUpdateBalance: %w", err)
 	}
 
 	return nil

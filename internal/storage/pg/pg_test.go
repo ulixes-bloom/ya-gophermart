@@ -96,7 +96,7 @@ func TestStorage_WithdrawFromBalance(t *testing.T) {
 	// Регистрация заказа с начислнием бонусов
 	err = storage.RegisterOrder(userID, order.Number)
 	require.NoError(t, err)
-	err = storage.UpdateOrders([]models.Order{order})
+	err = storage.SetOrdersAccrualAndUpdateBalance([]models.Order{order})
 	require.NoError(t, err)
 
 	// Получениие баланса из БД

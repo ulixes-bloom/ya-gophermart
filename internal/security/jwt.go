@@ -1,7 +1,6 @@
 package security
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -12,21 +11,6 @@ import (
 type Claims struct {
 	jwt.RegisteredClaims
 	UserID int64
-}
-
-func ValidateJWTString(tokenString, secretKey string) (bool, error) {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
-	if err != nil {
-		return false, err
-	}
-
-	if !token.Valid {
-		return false, errors.New("")
-	}
-
-	return true, nil
 }
 
 func BuildJWTString(userID int64, secretKey string, tokenLifetime time.Duration) (string, error) {
@@ -41,6 +25,7 @@ func BuildJWTString(userID int64, secretKey string, tokenLifetime time.Duration)
 	if err != nil {
 		return "", fmt.Errorf("%w", err)
 	}
+
 	return tokenString, nil
 }
 
