@@ -60,7 +60,7 @@ func (a *API) updateNotProcessedOrders(ctx context.Context) {
 	updateNotProcessedOrdersTicker := time.NewTicker(a.conf.OrderInfoUpdateInterval)
 	defer updateNotProcessedOrdersTicker.Stop()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
 
 	for {
@@ -68,7 +68,7 @@ func (a *API) updateNotProcessedOrders(ctx context.Context) {
 		case <-updateNotProcessedOrdersTicker.C:
 			err := a.app.UpdateNotProcessedOrders(ctx)
 			if err != nil {
-				log.Error().Err(err).Msg(err.Error())
+				log.Error().Err(err).Msg("error during updating not processed orders")
 			}
 		case <-ctx.Done():
 			return

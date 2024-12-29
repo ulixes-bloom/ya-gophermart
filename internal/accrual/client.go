@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/rs/zerolog/log"
 	"github.com/ulixes-bloom/ya-gophermart/internal/config"
 	appErrors "github.com/ulixes-bloom/ya-gophermart/internal/errors"
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
@@ -28,19 +27,24 @@ func NewClient(conf *config.Config) *Client {
 
 func (ac *Client) GetOrdersInfo(ctx context.Context, orders []models.Order) ([]models.Order, error) {
 	wp := workerpool.New(ctx, ac.conf.AccrualRateLimit, ac.conf.AccrualRateLimit*2, ac.GetOrderInfo)
+	resOrders := make([]models.Order, 0, len(orders))
 
-	for _, order := range orders {
-		wp.Submit(&order)
+	for i := range orders {
+		wp.Submit(&orders[i])
 	}
 	wp.StopAndWait()
 
-	resOrders := []models.Order{}
 	for order := range wp.Results() {
 		resOrders = append(resOrders, *order)
 	}
 
+	var resultErr error
 	for err := range wp.Errors() {
-		log.Warn().Msg(err.Error())
+		resultErr = errors.Join(resultErr, err)
+	}
+
+	if resultErr != nil {
+		return nil, resultErr
 	}
 
 	return resOrders, nil
