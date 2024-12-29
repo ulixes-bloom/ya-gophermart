@@ -1,11 +1,13 @@
 package accrual
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/rs/zerolog/log"
 	"github.com/ulixes-bloom/ya-gophermart/internal/config"
 	appErrors "github.com/ulixes-bloom/ya-gophermart/internal/errors"
 	"github.com/ulixes-bloom/ya-gophermart/internal/models"
@@ -24,8 +26,8 @@ func NewClient(conf *config.Config) *Client {
 	}
 }
 
-func (ac *Client) GetOrdersInfo(orders []models.Order) ([]models.Order, error) {
-	wp := workerpool.New(ac.conf.AccrualRateLimit, ac.conf.AccrualRateLimit*2, ac.GetOrderInfo)
+func (ac *Client) GetOrdersInfo(ctx context.Context, orders []models.Order) ([]models.Order, error) {
+	wp := workerpool.New(ctx, ac.conf.AccrualRateLimit, ac.conf.AccrualRateLimit*2, ac.GetOrderInfo)
 
 	for _, order := range orders {
 		wp.Submit(&order)
@@ -33,15 +35,19 @@ func (ac *Client) GetOrdersInfo(orders []models.Order) ([]models.Order, error) {
 	wp.StopAndWait()
 
 	resOrders := []models.Order{}
-	for order := range wp.Results {
+	for order := range wp.Results() {
 		resOrders = append(resOrders, *order)
+	}
+
+	for err := range wp.Errors() {
+		log.Warn().Msg(err.Error())
 	}
 
 	return resOrders, nil
 }
 
-func (ac *Client) GetOrderInfo(order *models.Order) (*models.Order, error) {
-	req, err := http.NewRequest(http.MethodGet,
+func (ac *Client) GetOrderInfo(ctx context.Context, order *models.Order) (*models.Order, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet,
 		ac.conf.NormilizedAccrualSysAddr()+"/api/orders/"+order.Number,
 		nil)
 	if err != nil {

@@ -58,12 +58,12 @@ const docTemplate = `{
                         "in": "header"
                     },
                     {
-                        "description": "User Registration Information",
-                        "name": "user",
+                        "description": "Запрос на списание средств",
+                        "name": "WithdrawalRequest",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.WithdrawalRequest"
+                            "$ref": "#/definitions/models.WithdrawalRequest"
                         }
                     }
                 ],
@@ -100,7 +100,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.User"
+                            "$ref": "#/definitions/models.User"
                         }
                     }
                 ],
@@ -164,12 +164,12 @@ const docTemplate = `{
                         "in": "header"
                     },
                     {
-                        "description": "User Registration Information",
-                        "name": "user",
+                        "description": "Новый заказ",
+                        "name": "order",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.OrderRequest"
+                            "$ref": "#/definitions/models.OrderRequest"
                         }
                     }
                 ],
@@ -212,7 +212,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.User"
+                            "$ref": "#/definitions/models.User"
                         }
                     }
                 ],
@@ -265,7 +265,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_ulixes-bloom_ya-gophermart_internal_models.OrderRequest": {
+        "models.OrderRequest": {
             "type": "object",
             "properties": {
                 "number": {
@@ -273,7 +273,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ulixes-bloom_ya-gophermart_internal_models.User": {
+        "models.User": {
             "type": "object",
             "properties": {
                 "login": {
@@ -284,10 +284,10 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ulixes-bloom_ya-gophermart_internal_models.WithdrawalRequest": {
+        "models.WithdrawalRequest": {
             "type": "object",
             "properties": {
-                "order_number": {
+                "order": {
                     "type": "string"
                 },
                 "sum": {

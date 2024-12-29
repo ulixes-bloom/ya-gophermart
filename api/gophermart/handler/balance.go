@@ -19,6 +19,8 @@ import (
 // @Router		/api/user/balance [get]
 // @Param		Authorization	header	string	false	"Bearer"
 func (h *HTTPHandler) GetUserBalance(rw http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	userID, ok := req.Context().Value(middleware.UserIDContext).(int64)
 	if !ok {
 		h.handleError(rw,
@@ -28,7 +30,7 @@ func (h *HTTPHandler) GetUserBalance(rw http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	dbBalance, err := h.app.GetUserBalance(userID)
+	dbBalance, err := h.app.GetUserBalance(ctx, userID)
 	if err != nil {
 		h.handleError(rw, err, "failed to get user balance", http.StatusInternalServerError)
 		return
@@ -38,8 +40,6 @@ func (h *HTTPHandler) GetUserBalance(rw http.ResponseWriter, req *http.Request) 
 		h.handleError(rw, err, "failed to encode balance", http.StatusInternalServerError)
 		return
 	}
-
-	rw.WriteHeader(http.StatusOK)
 }
 
 // @Summary	Запрос на списание средств
@@ -51,9 +51,11 @@ func (h *HTTPHandler) GetUserBalance(rw http.ResponseWriter, req *http.Request) 
 // @Failure	422	"неверный номер заказа"
 // @Failure	500	"внутренняя ошибка сервера"
 // @Router		/api/user/balance/withdraw [post]
-// @Param		Authorization	header	string						false	"Bearer"
-// @Param		user			body	models.WithdrawalRequest	true	"User Registration Information"
+// @Param		Authorization		header	string						false	"Bearer"
+// @Param		WithdrawalRequest	body	models.WithdrawalRequest	true	"Запрос на списание средств"
 func (h *HTTPHandler) WithdrawFromUserBalance(rw http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	userID, ok := req.Context().Value(middleware.UserIDContext).(int64)
 	if !ok {
 		h.handleError(rw,
@@ -84,7 +86,7 @@ func (h *HTTPHandler) WithdrawFromUserBalance(rw http.ResponseWriter, req *http.
 		return
 	}
 
-	err := h.app.WithdrawFromUserBalance(userID, withdrawalReq)
+	err := h.app.WithdrawFromUserBalance(ctx, userID, withdrawalReq)
 	if err != nil {
 		if errors.Is(err, appErrors.ErrNegativeBalance) {
 			h.handleError(rw, err, appErrors.ErrNegativeBalance.Error(), http.StatusPaymentRequired)
@@ -107,6 +109,8 @@ func (h *HTTPHandler) WithdrawFromUserBalance(rw http.ResponseWriter, req *http.
 // @Router		/api/user/withdrawals [get]
 // @Param		Authorization	header	string	false	"Bearer"
 func (h *HTTPHandler) GetUserWithdrawals(rw http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	userID, ok := req.Context().Value(middleware.UserIDContext).(int64)
 	if !ok {
 		h.handleError(rw,
@@ -116,7 +120,7 @@ func (h *HTTPHandler) GetUserWithdrawals(rw http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	dbWithdrawals, err := h.app.GetUserWithdrawals(userID)
+	dbWithdrawals, err := h.app.GetUserWithdrawals(ctx, userID)
 	if err != nil {
 		h.handleError(rw, err, "failed to get user waithdrawals", http.StatusInternalServerError)
 		return
@@ -131,6 +135,4 @@ func (h *HTTPHandler) GetUserWithdrawals(rw http.ResponseWriter, req *http.Reque
 		h.handleError(rw, err, "failed to encode waithdrawals", http.StatusInternalServerError)
 		return
 	}
-
-	rw.WriteHeader(http.StatusOK)
 }

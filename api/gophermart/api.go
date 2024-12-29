@@ -37,7 +37,7 @@ func (a *API) Run(ctx context.Context) error {
 		errCh <- http.ListenAndServe(a.conf.RunAddr, a.router)
 	}()
 
-	// Обновление информаци по необработанным заказам
+	// Обновление информации по необработанным заказам
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -60,10 +60,13 @@ func (a *API) updateNotProcessedOrders(ctx context.Context) {
 	updateNotProcessedOrdersTicker := time.NewTicker(a.conf.OrderInfoUpdateInterval)
 	defer updateNotProcessedOrdersTicker.Stop()
 
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
 	for {
 		select {
 		case <-updateNotProcessedOrdersTicker.C:
-			err := a.app.UpdateNotProcessedOrders()
+			err := a.app.UpdateNotProcessedOrders(ctx)
 			if err != nil {
 				log.Error().Err(err).Msg(err.Error())
 			}

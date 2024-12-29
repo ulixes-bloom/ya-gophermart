@@ -7,7 +7,6 @@ import (
 
 type Money float64
 
-//easyjson:json
 type (
 	Balance struct {
 		ID        int64 `json:"-"`
@@ -16,7 +15,6 @@ type (
 		Current   Money `json:"current"`
 	}
 
-	//easyjson:json
 	Withdrawal struct {
 		ID          int64     `json:"-"`
 		UserID      int64     `json:"-"`
@@ -25,7 +23,6 @@ type (
 		Sum         Money     `json:"sum"`
 	}
 
-	//easyjson:json//easyjson:json
 	WithdrawalRequest struct {
 		Order string `json:"order"`
 		Sum   Money  `json:"sum"`

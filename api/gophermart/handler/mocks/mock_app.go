@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,77 +36,77 @@ func (m *MockApp) EXPECT() *MockAppMockRecorder {
 }
 
 // GetOrdersByUser mocks base method.
-func (m *MockApp) GetOrdersByUser(userID int64) ([]models.Order, error) {
+func (m *MockApp) GetOrdersByUser(ctx context.Context, userID int64) ([]models.Order, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrdersByUser", userID)
+	ret := m.ctrl.Call(m, "GetOrdersByUser", ctx, userID)
 	ret0, _ := ret[0].([]models.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetOrdersByUser indicates an expected call of GetOrdersByUser.
-func (mr *MockAppMockRecorder) GetOrdersByUser(userID interface{}) *gomock.Call {
+func (mr *MockAppMockRecorder) GetOrdersByUser(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersByUser", reflect.TypeOf((*MockApp)(nil).GetOrdersByUser), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersByUser", reflect.TypeOf((*MockApp)(nil).GetOrdersByUser), ctx, userID)
 }
 
 // GetUserBalance mocks base method.
-func (m *MockApp) GetUserBalance(userID int64) (*models.Balance, error) {
+func (m *MockApp) GetUserBalance(ctx context.Context, userID int64) (*models.Balance, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserBalance", userID)
+	ret := m.ctrl.Call(m, "GetUserBalance", ctx, userID)
 	ret0, _ := ret[0].(*models.Balance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserBalance indicates an expected call of GetUserBalance.
-func (mr *MockAppMockRecorder) GetUserBalance(userID interface{}) *gomock.Call {
+func (mr *MockAppMockRecorder) GetUserBalance(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBalance", reflect.TypeOf((*MockApp)(nil).GetUserBalance), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBalance", reflect.TypeOf((*MockApp)(nil).GetUserBalance), ctx, userID)
 }
 
 // GetUserWithdrawals mocks base method.
-func (m *MockApp) GetUserWithdrawals(userID int64) ([]models.Withdrawal, error) {
+func (m *MockApp) GetUserWithdrawals(ctx context.Context, userID int64) ([]models.Withdrawal, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserWithdrawals", userID)
+	ret := m.ctrl.Call(m, "GetUserWithdrawals", ctx, userID)
 	ret0, _ := ret[0].([]models.Withdrawal)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserWithdrawals indicates an expected call of GetUserWithdrawals.
-func (mr *MockAppMockRecorder) GetUserWithdrawals(userID interface{}) *gomock.Call {
+func (mr *MockAppMockRecorder) GetUserWithdrawals(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserWithdrawals", reflect.TypeOf((*MockApp)(nil).GetUserWithdrawals), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserWithdrawals", reflect.TypeOf((*MockApp)(nil).GetUserWithdrawals), ctx, userID)
 }
 
 // RegisterOrder mocks base method.
-func (m *MockApp) RegisterOrder(userID int64, orderNumber string) error {
+func (m *MockApp) RegisterOrder(ctx context.Context, userID int64, orderNumber string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterOrder", userID, orderNumber)
+	ret := m.ctrl.Call(m, "RegisterOrder", ctx, userID, orderNumber)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RegisterOrder indicates an expected call of RegisterOrder.
-func (mr *MockAppMockRecorder) RegisterOrder(userID, orderNumber interface{}) *gomock.Call {
+func (mr *MockAppMockRecorder) RegisterOrder(ctx, userID, orderNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterOrder", reflect.TypeOf((*MockApp)(nil).RegisterOrder), userID, orderNumber)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterOrder", reflect.TypeOf((*MockApp)(nil).RegisterOrder), ctx, userID, orderNumber)
 }
 
 // RegisterUser mocks base method.
-func (m *MockApp) RegisterUser(user *models.User) (int64, error) {
+func (m *MockApp) RegisterUser(ctx context.Context, user *models.User) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterUser", user)
+	ret := m.ctrl.Call(m, "RegisterUser", ctx, user)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // RegisterUser indicates an expected call of RegisterUser.
-func (mr *MockAppMockRecorder) RegisterUser(user interface{}) *gomock.Call {
+func (mr *MockAppMockRecorder) RegisterUser(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUser", reflect.TypeOf((*MockApp)(nil).RegisterUser), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUser", reflect.TypeOf((*MockApp)(nil).RegisterUser), ctx, user)
 }
 
 // ValidateOrderNumber mocks base method.
@@ -123,30 +124,30 @@ func (mr *MockAppMockRecorder) ValidateOrderNumber(orderNumber interface{}) *gom
 }
 
 // ValidateUser mocks base method.
-func (m *MockApp) ValidateUser(user *models.User) (*models.User, error) {
+func (m *MockApp) ValidateUser(ctx context.Context, user *models.User) (*models.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateUser", user)
+	ret := m.ctrl.Call(m, "ValidateUser", ctx, user)
 	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ValidateUser indicates an expected call of ValidateUser.
-func (mr *MockAppMockRecorder) ValidateUser(user interface{}) *gomock.Call {
+func (mr *MockAppMockRecorder) ValidateUser(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateUser", reflect.TypeOf((*MockApp)(nil).ValidateUser), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateUser", reflect.TypeOf((*MockApp)(nil).ValidateUser), ctx, user)
 }
 
 // WithdrawFromUserBalance mocks base method.
-func (m *MockApp) WithdrawFromUserBalance(userID int64, withdrawalReq *models.WithdrawalRequest) error {
+func (m *MockApp) WithdrawFromUserBalance(ctx context.Context, userID int64, withdrawalReq *models.WithdrawalRequest) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WithdrawFromUserBalance", userID, withdrawalReq)
+	ret := m.ctrl.Call(m, "WithdrawFromUserBalance", ctx, userID, withdrawalReq)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // WithdrawFromUserBalance indicates an expected call of WithdrawFromUserBalance.
-func (mr *MockAppMockRecorder) WithdrawFromUserBalance(userID, withdrawalReq interface{}) *gomock.Call {
+func (mr *MockAppMockRecorder) WithdrawFromUserBalance(ctx, userID, withdrawalReq interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawFromUserBalance", reflect.TypeOf((*MockApp)(nil).WithdrawFromUserBalance), userID, withdrawalReq)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithdrawFromUserBalance", reflect.TypeOf((*MockApp)(nil).WithdrawFromUserBalance), ctx, userID, withdrawalReq)
 }

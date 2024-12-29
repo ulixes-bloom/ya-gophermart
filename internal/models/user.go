@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-//easyjson:json
 type User struct {
 	ID       int64  `json:"-"`
 	Login    string `json:"login"`

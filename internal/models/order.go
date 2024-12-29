@@ -6,7 +6,6 @@ import (
 )
 
 type (
-	//easyjson:json
 	Order struct {
 		ID         int64       `json:"-"`
 		UserID     int64       `json:"-"`

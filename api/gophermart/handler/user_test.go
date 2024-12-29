@@ -36,7 +36,7 @@ func TestHandler_RegisterUser(t *testing.T) {
 					Password: "password",
 				}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().RegisterUser(user).Return(int64(1), nil)
+				mockService.EXPECT().RegisterUser(gomock.Any(), user).Return(int64(1), nil)
 				return mockService
 			},
 			conf:                      *config.GetDefault(),
@@ -55,7 +55,7 @@ func TestHandler_RegisterUser(t *testing.T) {
 				err := appErrors.ErrUserLoginAlreadyExists
 
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().RegisterUser(user).Return(int64(-1), err)
+				mockService.EXPECT().RegisterUser(gomock.Any(), user).Return(int64(-1), err)
 				return mockService
 			},
 			conf:                      *config.GetDefault(),
@@ -98,7 +98,7 @@ func TestHandler_RegisterUser(t *testing.T) {
 				err := errors.New("Table users does not exist")
 
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().RegisterUser(user).Return(int64(-1), err)
+				mockService.EXPECT().RegisterUser(gomock.Any(), user).Return(int64(-1), err)
 				return mockService
 			},
 			conf:                      *config.GetDefault(),
@@ -150,7 +150,7 @@ func TestHandler_AuthUser(t *testing.T) {
 					Password: "password",
 				}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().ValidateUser(user).Return(dbUser, nil)
+				mockService.EXPECT().ValidateUser(gomock.Any(), user).Return(dbUser, nil)
 				return mockService
 			},
 			conf:                      *config.GetDefault(),
@@ -167,7 +167,7 @@ func TestHandler_AuthUser(t *testing.T) {
 					Password: "password",
 				}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().ValidateUser(user).Return(nil, appErrors.ErrInvalidUserLoginOrPassword)
+				mockService.EXPECT().ValidateUser(gomock.Any(), user).Return(nil, appErrors.ErrInvalidUserLoginOrPassword)
 				return mockService
 			},
 			conf:                      *config.GetDefault(),

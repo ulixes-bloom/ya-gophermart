@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type pgstorage struct {
@@ -100,4 +103,11 @@ func (ps *pgstorage) createTables(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func isUniqueViolation(err error, constraint string) bool {
+	if pgError, ok := err.(*pgconn.PgError); ok {
+		return pgError.Code == pgerrcode.UniqueViolation && pgError.ConstraintName == constraint
+	}
+	return false
 }

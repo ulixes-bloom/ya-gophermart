@@ -2,6 +2,7 @@ package accrual
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"testing"
@@ -81,8 +82,9 @@ func TestAccrualClient_GetOrderInfo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ac := Client{conf: tt.conf, http: tt.mockClient()}
+			ctx := context.Background()
 
-			order, err := ac.GetOrderInfo(&models.Order{})
+			order, err := ac.GetOrderInfo(ctx, &models.Order{})
 
 			if tt.expectedErr != nil {
 				assert.ErrorIs(t, err, tt.expectedErr)

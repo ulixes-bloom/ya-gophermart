@@ -1,19 +1,19 @@
 definitions:
-  github_com_ulixes-bloom_ya-gophermart_internal_models.OrderRequest:
+  models.OrderRequest:
     properties:
       number:
         type: string
     type: object
-  github_com_ulixes-bloom_ya-gophermart_internal_models.User:
+  models.User:
     properties:
       login:
         type: string
       password:
         type: string
     type: object
-  github_com_ulixes-bloom_ya-gophermart_internal_models.WithdrawalRequest:
+  models.WithdrawalRequest:
     properties:
-      order_number:
+      order:
         type: string
       sum:
         type: number
@@ -47,12 +47,12 @@ paths:
         in: header
         name: Authorization
         type: string
-      - description: User Registration Information
+      - description: Запрос на списание средств
         in: body
-        name: user
+        name: WithdrawalRequest
         required: true
         schema:
-          $ref: '#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.WithdrawalRequest'
+          $ref: '#/definitions/models.WithdrawalRequest'
       produces:
       - application/json
       responses:
@@ -76,7 +76,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.User'
+          $ref: '#/definitions/models.User'
       produces:
       - application/json
       responses:
@@ -116,12 +116,12 @@ paths:
         in: header
         name: Authorization
         type: string
-      - description: User Registration Information
+      - description: Новый заказ
         in: body
-        name: user
+        name: order
         required: true
         schema:
-          $ref: '#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.OrderRequest'
+          $ref: '#/definitions/models.OrderRequest'
       produces:
       - application/json
       responses:
@@ -149,7 +149,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/github_com_ulixes-bloom_ya-gophermart_internal_models.User'
+          $ref: '#/definitions/models.User'
       produces:
       - application/json
       responses:

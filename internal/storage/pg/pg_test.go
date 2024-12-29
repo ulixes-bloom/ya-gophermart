@@ -30,11 +30,11 @@ func TestStorage_CreateUser(t *testing.T) {
 	}
 
 	// Создание пользователя в БД
-	userID, err := storage.AddUser(user.Login, user.Password)
+	userID, err := storage.AddUser(ctx, user.Login, user.Password)
 	require.NoError(t, err)
 
 	// Поиск созданного пользователя в БД
-	dbUser, err := storage.GetUserByLogin(user.Login)
+	dbUser, err := storage.GetUserByLogin(ctx, user.Login)
 	require.NoError(t, err)
 	require.NotNil(t, dbUser)
 
@@ -44,11 +44,11 @@ func TestStorage_CreateUser(t *testing.T) {
 	assert.NilError(t, security.CheckPassword(user.Password, dbUser.Password))
 
 	// Создание пользователя с уже существующим логином
-	_, err = storage.AddUser(user.Login, user.Password)
+	_, err = storage.AddUser(ctx, user.Login, user.Password)
 	assert.ErrorIs(t, err, appErrors.ErrUserLoginAlreadyExists)
 
 	// Поиск несуществующего пользователя в БД
-	dbUser, err = storage.GetUserByLogin("not_existing_login")
+	dbUser, err = storage.GetUserByLogin(ctx, "not_existing_login")
 	require.Error(t, err)
 	require.Nil(t, dbUser)
 }
@@ -66,11 +66,11 @@ func TestStorage_WithdrawFromBalance(t *testing.T) {
 	}
 
 	// Создание пользователя в БД
-	userID, err := storage.AddUser(user.Login, user.Password)
+	userID, err := storage.AddUser(ctx, user.Login, user.Password)
 	require.NoError(t, err)
 
 	// Поиск баланса созданного пользователя в БД
-	dbBalance, err := storage.GetBalanceByUser(userID)
+	dbBalance, err := storage.GetBalanceByUser(ctx, userID)
 	require.NoError(t, err)
 	require.NotNil(t, dbBalance)
 
@@ -83,7 +83,7 @@ func TestStorage_WithdrawFromBalance(t *testing.T) {
 	}
 
 	// Попытка списания со счета при недостаточном значении баланса
-	err = storage.WithdrawFromUserBalance(userID, withdrawalReq.Order, withdrawalReq.Sum)
+	err = storage.WithdrawFromUserBalance(ctx, userID, withdrawalReq.Order, withdrawalReq.Sum)
 	assert.ErrorIs(t, err, appErrors.ErrNegativeBalance)
 
 	order := models.Order{
@@ -94,13 +94,13 @@ func TestStorage_WithdrawFromBalance(t *testing.T) {
 	}
 
 	// Регистрация заказа с начислнием бонусов
-	err = storage.RegisterOrder(userID, order.Number)
+	err = storage.RegisterOrder(ctx, userID, order.Number)
 	require.NoError(t, err)
-	err = storage.SetOrdersAccrualAndUpdateBalance([]models.Order{order})
+	err = storage.SetOrdersAccrualAndUpdateBalance(ctx, []models.Order{order})
 	require.NoError(t, err)
 
 	// Получениие баланса из БД
-	dbBalance, err = storage.GetBalanceByUser(userID)
+	dbBalance, err = storage.GetBalanceByUser(ctx, userID)
 	require.NoError(t, err)
 	require.NotNil(t, dbBalance)
 
@@ -109,11 +109,11 @@ func TestStorage_WithdrawFromBalance(t *testing.T) {
 	assert.Equal(t, dbBalance.Withdrawn, models.Money(0))
 
 	// Попытка списания со счета при достаточном значении баланса
-	err = storage.WithdrawFromUserBalance(userID, withdrawalReq.Order, withdrawalReq.Sum)
+	err = storage.WithdrawFromUserBalance(ctx, userID, withdrawalReq.Order, withdrawalReq.Sum)
 	require.NoError(t, err)
 
 	// Проверка результата списания средств со счета
-	dbBalance, err = storage.GetBalanceByUser(userID)
+	dbBalance, err = storage.GetBalanceByUser(ctx, userID)
 	require.NoError(t, err)
 	require.NotNil(t, dbBalance)
 

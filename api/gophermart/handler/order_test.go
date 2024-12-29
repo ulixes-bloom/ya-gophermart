@@ -32,7 +32,7 @@ func TestHandler_RegisterUserOrder(t *testing.T) {
 			name: "Success Case",
 			mockService: func() *mocks.MockApp {
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().RegisterOrder(int64(1), "2377225624").Return(nil)
+				mockService.EXPECT().RegisterOrder(gomock.Any(), int64(1), "2377225624").Return(nil)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -46,7 +46,7 @@ func TestHandler_RegisterUserOrder(t *testing.T) {
 				mockService := mocks.NewMockApp(ctrl)
 				err := appErrors.ErrOrderWasUploadedByCurrentUser
 
-				mockService.EXPECT().RegisterOrder(int64(1), "2377225624").Return(err)
+				mockService.EXPECT().RegisterOrder(gomock.Any(), int64(1), "2377225624").Return(err)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -60,7 +60,7 @@ func TestHandler_RegisterUserOrder(t *testing.T) {
 				mockService := mocks.NewMockApp(ctrl)
 				err := appErrors.ErrOrderWasUploadedByAnotherUser
 
-				mockService.EXPECT().RegisterOrder(int64(1), "2377225624").Return(err)
+				mockService.EXPECT().RegisterOrder(gomock.Any(), int64(1), "2377225624").Return(err)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -95,7 +95,7 @@ func TestHandler_RegisterUserOrder(t *testing.T) {
 				mockService := mocks.NewMockApp(ctrl)
 				err := errors.New("Table orders does not exist")
 
-				mockService.EXPECT().RegisterOrder(int64(1), "2377225624").Return(err)
+				mockService.EXPECT().RegisterOrder(gomock.Any(), int64(1), "2377225624").Return(err)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -143,7 +143,7 @@ func TestHandler_GetUserOrders(t *testing.T) {
 					},
 				}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().GetOrdersByUser(int64(1)).Return(orders, nil)
+				mockService.EXPECT().GetOrdersByUser(gomock.Any(), int64(1)).Return(orders, nil)
 				return mockService
 			},
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
@@ -155,7 +155,7 @@ func TestHandler_GetUserOrders(t *testing.T) {
 			mockService: func() *mocks.MockApp {
 				orders := []models.Order{}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().GetOrdersByUser(int64(1)).Return(orders, nil)
+				mockService.EXPECT().GetOrdersByUser(gomock.Any(), int64(1)).Return(orders, nil)
 				return mockService
 			},
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
@@ -167,7 +167,7 @@ func TestHandler_GetUserOrders(t *testing.T) {
 			mockService: func() *mocks.MockApp {
 				err := errors.New("Table orders does not exist")
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().GetOrdersByUser(int64(1)).Return(nil, err)
+				mockService.EXPECT().GetOrdersByUser(gomock.Any(), int64(1)).Return(nil, err)
 				return mockService
 			},
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),

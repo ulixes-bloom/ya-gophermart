@@ -37,7 +37,7 @@ func TestHandler_GetUserBalance(t *testing.T) {
 					Withdrawn: 0,
 				}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().GetUserBalance(int64(1)).Return(mockBalance, nil)
+				mockService.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(mockBalance, nil)
 				return mockService
 			},
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
@@ -50,7 +50,7 @@ func TestHandler_GetUserBalance(t *testing.T) {
 				err := errors.New("User balance does not exist")
 
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().GetUserBalance(int64(1)).Return(nil, err)
+				mockService.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(nil, err)
 				return mockService
 			},
 			ctx:                context.WithValue(context.Background(), middleware.UserIDContext, int64(1)),
@@ -94,7 +94,7 @@ func TestHandler_WithdrawFromUserBalance(t *testing.T) {
 					Sum:   200,
 				}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().WithdrawFromUserBalance(int64(1), withdrawalReq).Return(nil)
+				mockService.EXPECT().WithdrawFromUserBalance(gomock.Any(), int64(1), withdrawalReq).Return(nil)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -112,7 +112,7 @@ func TestHandler_WithdrawFromUserBalance(t *testing.T) {
 				err := appErrors.ErrNegativeBalance
 
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().WithdrawFromUserBalance(int64(1), withdrawalReq).Return(err)
+				mockService.EXPECT().WithdrawFromUserBalance(gomock.Any(), int64(1), withdrawalReq).Return(err)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -141,7 +141,7 @@ func TestHandler_WithdrawFromUserBalance(t *testing.T) {
 				err := errors.New("Table witdrawals does not exist")
 
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().WithdrawFromUserBalance(int64(1), withdrawalReq).Return(err)
+				mockService.EXPECT().WithdrawFromUserBalance(gomock.Any(), int64(1), withdrawalReq).Return(err)
 				mockService.EXPECT().ValidateOrderNumber("2377225624").Return(true)
 				return mockService
 			},
@@ -188,7 +188,7 @@ func TestHandler_GetUserWithdrawals(t *testing.T) {
 					},
 				}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().GetUserWithdrawals(int64(1)).Return(withdrawals, nil)
+				mockService.EXPECT().GetUserWithdrawals(gomock.Any(), int64(1)).Return(withdrawals, nil)
 				return mockService
 			},
 			expectedBody:       "[{\"order\":\"2377225624\",\"processed_at\":\"2024-01-02T00:00:00Z\",\"sum\":200}]\n",
@@ -200,7 +200,7 @@ func TestHandler_GetUserWithdrawals(t *testing.T) {
 			mockService: func() *mocks.MockApp {
 				withdrawals := []models.Withdrawal{}
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().GetUserWithdrawals(int64(1)).Return(withdrawals, nil)
+				mockService.EXPECT().GetUserWithdrawals(gomock.Any(), int64(1)).Return(withdrawals, nil)
 				return mockService
 			},
 			expectedBody:       "",
@@ -212,7 +212,7 @@ func TestHandler_GetUserWithdrawals(t *testing.T) {
 			mockService: func() *mocks.MockApp {
 				err := errors.New("Table witdrawals does not exist")
 				mockService := mocks.NewMockApp(ctrl)
-				mockService.EXPECT().GetUserWithdrawals(int64(1)).Return(nil, err)
+				mockService.EXPECT().GetUserWithdrawals(gomock.Any(), int64(1)).Return(nil, err)
 				return mockService
 			},
 			expectedBody:       "failed to get user waithdrawals\n",

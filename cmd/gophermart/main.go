@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	api "github.com/ulixes-bloom/ya-gophermart/api/gophermart"
 	"github.com/ulixes-bloom/ya-gophermart/internal/app"
@@ -19,6 +20,12 @@ func main() {
 	if err != nil {
 		log.Error().Msg(err.Error())
 	}
+
+	logLvl, err := zerolog.ParseLevel(conf.LogLvl)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to parse log level")
+	}
+	zerolog.SetGlobalLevel(logLvl)
 
 	db, err := sql.Open("pgx", conf.DatabaseURI)
 	if err != nil {

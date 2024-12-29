@@ -22,8 +22,10 @@ import (
 // @Failure	500	"внутренняя ошибка сервера"
 // @Router		/api/user/orders [post]
 // @Param		Authorization	header	string				false	"Bearer"
-// @Param		user			body	models.OrderRequest	true	"User Registration Information"
+// @Param		order			body	models.OrderRequest	true	"Новый заказ"
 func (h *HTTPHandler) RegisterUserOrder(rw http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	userID, ok := req.Context().Value(middleware.UserIDContext).(int64)
 	if !ok {
 		h.handleError(rw,
@@ -54,7 +56,7 @@ func (h *HTTPHandler) RegisterUserOrder(rw http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	err := h.app.RegisterOrder(userID, orderReq.Number)
+	err := h.app.RegisterOrder(ctx, userID, orderReq.Number)
 	if err != nil {
 		switch {
 		case errors.Is(err, appErrors.ErrOrderWasUploadedByCurrentUser):
@@ -83,6 +85,8 @@ func (h *HTTPHandler) RegisterUserOrder(rw http.ResponseWriter, req *http.Reques
 // @Router		/api/user/orders [get]
 // @Param		Authorization	header	string	false	"Bearer"
 func (h *HTTPHandler) GetUserOrders(rw http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	userID, ok := req.Context().Value(middleware.UserIDContext).(int64)
 	if !ok {
 		h.handleError(rw,
@@ -92,7 +96,7 @@ func (h *HTTPHandler) GetUserOrders(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	dbOrders, err := h.app.GetOrdersByUser(userID)
+	dbOrders, err := h.app.GetOrdersByUser(ctx, userID)
 	if err != nil {
 		h.handleError(rw, err, "failed to get user orders", http.StatusInternalServerError)
 		return
@@ -107,6 +111,4 @@ func (h *HTTPHandler) GetUserOrders(rw http.ResponseWriter, req *http.Request) {
 		h.handleError(rw, err, "failed to encode orders", http.StatusInternalServerError)
 		return
 	}
-
-	rw.WriteHeader(http.StatusOK)
 }

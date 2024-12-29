@@ -1,7 +1,6 @@
 package models
 
 type (
-	//easyjson:json
 	AccrualResponse struct {
 		OrderNumber   string        `json:"order"`
 		AccrualStatus AccrualStatus `json:"status"`

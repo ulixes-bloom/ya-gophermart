@@ -21,6 +21,8 @@ import (
 // @Router		/api/user/register [post]
 // @Param		user	body	models.User	true	"User Registration Information"
 func (h *HTTPHandler) RegisterUser(rw http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	if req.Body == nil {
 		h.handleError(rw, nil, "request body is missing", http.StatusBadRequest)
 		return
@@ -38,7 +40,7 @@ func (h *HTTPHandler) RegisterUser(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	createdUserID, err := h.app.RegisterUser(user)
+	createdUserID, err := h.app.RegisterUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, appErrors.ErrUserLoginAlreadyExists) {
 			h.handleError(rw, err, appErrors.ErrUserLoginAlreadyExists.Error(), http.StatusConflict)
@@ -68,6 +70,8 @@ func (h *HTTPHandler) RegisterUser(rw http.ResponseWriter, req *http.Request) {
 // @Router		/api/user/login [post]
 // @Param		user	body	models.User	true	"User Registration Information"
 func (h *HTTPHandler) AuthUser(rw http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	if req.Body == nil {
 		h.handleError(rw, nil, "request body is missing", http.StatusBadRequest)
 		return
@@ -85,7 +89,7 @@ func (h *HTTPHandler) AuthUser(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	dbUser, err := h.app.ValidateUser(user)
+	dbUser, err := h.app.ValidateUser(ctx, user)
 	if err != nil {
 		h.handleError(rw, err, appErrors.ErrInvalidUserLoginOrPassword.Error(), http.StatusUnauthorized)
 		return
